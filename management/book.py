@@ -1,23 +1,31 @@
+from management.StatisticsManager import StatisticsManager
+
+
 class Book:
+    def __init__(self, title, author, copies, genre, year, is_loaned=False, available=None, stat_manager=None):
+        if not title or not author:
+            raise ValueError("Title and author are required")
+        if not isinstance(copies, int) or copies < 0:
+            raise ValueError("Copies must be a non-negative integer")
 
-    def __init__(self, title, author, is_loaned, copies, genre, year, available):
-        self.title = title
-        self.author = author
-        self.is_loaned = is_loaned
+        self.title = title.strip()
+        self.author = author.strip()
         self.copies = copies
-        self.genre = genre
+        self.genre = genre.strip()
         self.year = year
-        self.available = available
-
-
+        self.is_loaned = is_loaned
+        self.available = available if available is not None else copies
+        self.stat_manager = stat_manager
+        self.key = StatisticsManager.generate_key(title, author)
 
     def borrow(self):
         """Borrow a book."""
         if self.available > 0:
             self.available -= 1
-            print(f"Borrowed '{self.title}'. Available copies: {self.available}")
-        else:
-            print(f"'{self.title}' is currently out of stock!")
+            if self.stat_manager:
+                self.stat_manager.update_request_count(self.key)
+            return True
+        return False
 
     def return_book(self):
         """Return a borrowed book."""
@@ -26,8 +34,9 @@ class Book:
             return True
         return False
 
-
-    def to_dict(self):
+    def to_dict(self, statistics_manager):
+        """Convert the book details into a dictionary with request counts."""
+        request_count = statistics_manager.get_request_count(self.key)
         return {
             "Title": self.title,
             "Author": self.author,
@@ -35,20 +44,12 @@ class Book:
             "Category": self.genre,
             "TotalCopies": self.copies,
             "AvailableCopies": self.available,
+            "RequestCount": request_count,
         }
 
-    def generate_key(title, author):
-        """Generates a normalized key for a book based on its title and author."""
-        if not title or not author:
-            raise ValueError("Both title and author are required to generate a key.")
-        return f"{title.strip().lower()}:{author.strip().lower()}"
-
     def __str__(self):
-        """
-        Returns a user-friendly string representation of the book.
-        """
         status = "Borrowed" if self.is_loaned else "Available"
-        return f" {self.title} by {self.author} ({self.genre}), Status: {status}"
+        return f"{self.title} by {self.author} ({self.genre}), Status: {status}"
 
 
 
