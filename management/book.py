@@ -1,6 +1,3 @@
-from management.StatisticsManager import StatisticsManager
-
-
 class Book:
     def __init__(self, title, author, copies, genre, year, is_loaned=False, available=None, stat_manager=None):
         if not title or not author:
@@ -16,7 +13,11 @@ class Book:
         self.is_loaned = is_loaned
         self.available = available if available is not None else copies
         self.stat_manager = stat_manager
-        self.key = StatisticsManager.generate_key(title, author)
+
+    @property
+    def key(self):
+        from management.StatisticsManager import StatisticsManager  # Lazy import
+        return StatisticsManager.generate_key(self.title, self.author)
 
     def borrow(self):
         """Borrow a book."""
@@ -37,6 +38,7 @@ class Book:
     def to_dict(self, statistics_manager):
         """Convert the book details into a dictionary with request counts."""
         request_count = statistics_manager.get_request_count(self.key)
+        waitlist = statistics_manager.get_waitlist(self.key)
         return {
             "Title": self.title,
             "Author": self.author,
@@ -45,12 +47,9 @@ class Book:
             "TotalCopies": self.copies,
             "AvailableCopies": self.available,
             "RequestCount": request_count,
+            "waitlist": waitlist
         }
 
     def __str__(self):
         status = "Borrowed" if self.is_loaned else "Available"
         return f"{self.title} by {self.author} ({self.genre}), Status: {status}"
-
-
-
-

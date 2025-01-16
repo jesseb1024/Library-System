@@ -1,8 +1,5 @@
 from tkinter import ttk, messagebox
 import tkinter as tk
-from tkinter.font import Font
-
-from management.LibraryFileManager import LibraryFileManager
 from management.StatisticsManager import StatisticsManager
 from management.librarian import LibrarianManager
 
@@ -23,6 +20,27 @@ class LibraryGUI:
         self.librarian = None
         self.login_screen()
 
+
+
+    def register_screen(self):
+        """Create a registration screen for librarian registration."""
+        register_frame = tk.Frame(self.root)
+        register_frame.pack(expand=True)
+
+        tk.Label(register_frame, text="Librarian Registration", font=("Helvetica", 16)).pack(pady=10)
+        tk.Label(register_frame, text="Username").pack(pady=5)
+        username_entry = tk.Entry(register_frame)
+        username_entry.pack()
+
+        tk.Label(register_frame, text="National id").pack(pady=5)
+        id_entry = tk.Entry(register_frame)
+        id_entry.pack()
+
+        tk.Label(register_frame, text="Password").pack(pady=5)
+        password_entry = tk.Entry(register_frame, show="*")
+        password_entry.pack()
+
+
     def login_screen(self):
         """Create a login screen for librarian authentication."""
         login_frame = tk.Frame(self.root)
@@ -33,6 +51,10 @@ class LibraryGUI:
         username_entry = tk.Entry(login_frame)
         username_entry.pack()
 
+        tk.Label(login_frame, text="Worker id").pack(pady=5)
+        id_entry = tk.Entry(login_frame)
+        id_entry.pack()
+
         tk.Label(login_frame, text="Password").pack(pady=5)
         password_entry = tk.Entry(login_frame, show="*")
         password_entry.pack()
@@ -40,11 +62,13 @@ class LibraryGUI:
         error_label = tk.Label(login_frame, text="", fg="red")
         error_label.pack()
 
+
         def on_login():
             username = username_entry.get().strip()
+            id = id_entry.get().strip()
             password = password_entry.get().strip()
             try:
-                self.controller.authenticate_librarian(username, password, self.librarian_manager)
+                self.controller.authenticate_librarian(username, id, password, self.librarian_manager)
                 login_frame.destroy()
                 self.create_dashboard()
             except PermissionError as e:
@@ -59,6 +83,7 @@ class LibraryGUI:
         self.create_action_buttons()
         self.create_book_list_table()
         self.update_book_list()
+
 
     def create_widgets(self):
         """Create essential widgets for the dashboard."""
@@ -79,7 +104,7 @@ class LibraryGUI:
 
         # Search Entry
         self.search_entry = ttk.Entry(search_frame, width=50, font=("Arial", 12))
-        self.search_entry.insert(0, "Search by title or author...")
+        self.search_entry.insert(0, "Search by title, author or genre...")
         self.search_entry.bind("<FocusIn>", lambda event: self.clear_placeholder())
         self.search_entry.bind("<FocusOut>", lambda event: self.restore_placeholder())
         self.search_entry.grid(row=0, column=0, padx=5, pady=5, sticky="w")
@@ -128,13 +153,13 @@ class LibraryGUI:
 
     def clear_placeholder(self):
         """Clear the placeholder in the search field."""
-        if self.search_entry.get() == "Search by title or author...":
+        if self.search_entry.get() == "Search by title, author or genre...":
             self.search_entry.delete(0, tk.END)
 
     def restore_placeholder(self, event=None):
         """Restore the placeholder text if the search bar is empty."""
         if not self.search_entry.get().strip():
-            self.search_entry.insert(0, "Search by title or author...")
+            self.search_entry.insert(0, "Search by title, author or genre...")
 
     def update_book_list(self):
         """Update the TreeView with books from the library."""
@@ -201,11 +226,61 @@ class LibraryGUI:
         title, author = book_data[0], book_data[1]
 
         try:
+            # Attempt to borrow the book
             self.controller.borrow_book(title, author)
             self.update_book_list()
             messagebox.showinfo("Success", f"Borrowed '{title}' successfully!")
         except ValueError as e:
-            messagebox.showerror("Error", str(e))
+            # If the book is unavailable, prompt to add user to the waitlist
+            if "No available copies" in str(e):
+                result = messagebox.askyesno("Waitlist",
+                                             f"'{title}' by {author} is unavailable. Do you want to add a user to the waitlist?")
+                if result:  # User chooses to add to the waitlist
+                    self.add_user_to_waitlist(title, author)
+            else:
+                messagebox.showerror("Error", str(e))
+
+    def add_user_to_waitlist(self, title, author):
+        """Prompt to add user to the waitlist for an unavailable book."""
+        # Create popup for entering user details
+        waitlist_window = tk.Toplevel(self.root)
+        waitlist_window.title("Add User to Waitlist")
+        waitlist_window.geometry("300x250")
+
+        tk.Label(waitlist_window, text="Enter User Details", font=("Helvetica", 14)).pack(pady=10)
+
+        tk.Label(waitlist_window, text="Name:").pack(pady=5)
+        name_entry = tk.Entry(waitlist_window)
+        name_entry.pack(pady=5)
+
+        tk.Label(waitlist_window, text="Phone:").pack(pady=5)
+        phone_entry = tk.Entry(waitlist_window)
+        phone_entry.pack(pady=5)
+
+        tk.Label(waitlist_window, text="Email:").pack(pady=5)
+        email_entry = tk.Entry(waitlist_window)
+        email_entry.pack(pady=5)
+
+        def submit_user():
+            # Retrieve user inputs
+            name = name_entry.get().strip()
+            phone = phone_entry.get().strip()
+            email = email_entry.get().strip()
+
+            # Validate and create the user
+            if not name or not phone or not email:
+                messagebox.showerror("Error", "All fields are required.")
+                return
+            try:
+                # Use the controller to add to the waitlist
+                self.controller.add_user_to_waitlist(title, author, name, phone, email)
+                messagebox.showinfo("Success", f"User '{name}' added to the waitlist for '{title}'.")
+                waitlist_window.destroy()
+            except Exception as ex:
+                messagebox.showerror("Error", f"Failed to add user to waitlist: {ex}")
+
+        # Submit button
+        tk.Button(waitlist_window, text="Submit", command=submit_user).pack(pady=10)
 
     def return_book(self):
         """Return a selected book."""
@@ -242,7 +317,7 @@ class LibraryGUI:
             messagebox.showerror("Error", str(e))
 
     def search_books(self):
-        """Search books by title or author."""
+        """Search books by title, author or genre."""
         query = self.search_entry.get().strip().lower()
         if not query:
             messagebox.showinfo("Search", "Please enter a search term.")
@@ -255,7 +330,7 @@ class LibraryGUI:
         # Display search results
         matching_books = [
             book for book in self.controller.get_books()
-            if query in book.title.lower() or query in book.author.lower()
+            if query in book.title.lower() or query in book.author.lower() or query in book.genre.lower()
         ]
 
         if not matching_books:

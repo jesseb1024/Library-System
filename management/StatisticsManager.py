@@ -1,9 +1,11 @@
 from collections import defaultdict
-
+import management.User as user
 
 class StatisticsManager:
     def __init__(self):
         self.request_count = defaultdict(int)
+        self.waiting_list = defaultdict(list)
+        self.user = user
 
     @staticmethod
     def generate_key(title, author):

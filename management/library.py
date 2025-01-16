@@ -101,3 +101,29 @@ class Library:
             self.file_manager.save_books(self.books, self.stat_manager.export_statistics())
         except Exception as e:
             raise RuntimeError(f"Error saving books: {e}")
+
+    def add_user_to_waitlist(self, title, author, username):
+        """Add a user to the waitlist for a specific book."""
+        book_key = StatisticsManager.generate_key(title, author)
+        if book_key not in self.books:
+            raise ValueError(f"Book '{title}' by {author} not found")
+        if username in self.stat_manager.get_waitlist(book_key):
+            raise ValueError(f"User '{username}' is already on the waitlist for '{title}' by {author}")
+        self.stat_manager.add_user_to_waitlist(book_key, username)
+        if self.file_manager:
+            self.save_books_to_csv()
+        return True
+
+    def remove_user_from_waitlist(self, title, author, username):
+        """Remove a user from the waitlist for a specific book."""
+        book_key = StatisticsManager.generate_key(title, author)
+        if book_key not in self.books:
+            raise ValueError(f"Book '{title}' by {author} not found")
+        self.stat_manager.remove_user_from_waitlist(book_key, username)
+        if self.file_manager:
+            self.save_books_to_csv()
+        return True
+
+    def get_waitlist(self, book_key):
+        """Get the waiting list for a specific book."""
+        return self.stat_manager.get_waitlist(book_key)

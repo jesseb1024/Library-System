@@ -31,16 +31,20 @@ class LibraryFileManager:
                     year=int(row["year"]),
                     available=int(row["available"]),
                 )
-
                 for _, row in df.iterrows()
             }
             request_counts = {
                 StatisticsManager.generate_key(row["title"], row["author"]): int(row["request_counter"])
                 for _, row in df.iterrows()
-
             }
-
-            self.stat_manager.load_statistics(request_counts)
+            # Split the waitlist strings into lists
+            waiting_lists = {
+                StatisticsManager.generate_key(row["title"], row["author"]): row["waitlist"].split(";") if isinstance(
+                    row["waitlist"], str) and row["waitlist"] else []
+                for _, row in df.iterrows()
+            }
+            self.stat_manager.waiting_list.update(waiting_lists)  # Load waitlist into StatisticsManager
+            self.stat_manager.load_statistics(request_counts)  # Load request counts
             return books, request_counts
         except Exception as e:
             raise RuntimeError(f"Error loading books from file: {e}")

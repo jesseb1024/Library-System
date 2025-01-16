@@ -1,36 +1,36 @@
-title,author,is_loaned,copies,genre,year,available,request_counter
-The Catcher in the Rye,J.D. Salinger,no,3,Fiction,1951,3,1
-To Kill a Mockingbird,Harper Lee,yes,2,Fiction,1960,0,2
-1984,George Orwell,yes,5,Dystopian,1949,0,5
-The Great Gatsby,F. Scott Fitzgerald,no,4,Classic,1925,4,0
-Moby Dick,Herman Melville,no,1,Adventure,1851,1,0
-Pride and Prejudice,Jane Austen,yes,3,Romance,1813,0,3
-War and Peace,Leo Tolstoy,no,2,Historical Fiction,1869,2,0
-Great Expectations,Charles Dickens,no,3,Classic,1861,3,0
-Crime and Punishment,Fyodor Dostoevsky,yes,1,Psychological Drama,1866,0,1
-The Brothers Karamazov,Fyodor Dostoevsky,no,3,Philosophy,1880,3,0
-The Divine Comedy,Dante Alighieri,yes,1,Epic Poetry,1320,0,1
-Jane Eyre,Charlotte Brontë,no,2,Gothic Fiction,1847,2,0
-Wuthering Heights,Emily Brontë,no,4,Gothic Romance,1847,4,0
-Anna Karenina,Leo Tolstoy,yes,2,Fiction,1877,0,2
-Madame Bovary,Gustave Flaubert,no,3,Realism,1857,3,0
-The Iliad,Homer,yes,1,Epic Poetry,-750,0,1
-The Sound and the Fury,William Faulkner,no,2,Modernism,1929,2,0
-Invisible Man,Ralph Ellison,yes,1,Fiction,1952,0,1
-Beloved,Toni Morrison,yes,3,Historical Fiction,1987,0,3
-Catch-22,Joseph Heller,no,4,Satire,1961,4,0
-Slaughterhouse-Five,Kurt Vonnegut,yes,2,Science Fiction,1969,0,2
-Brave New World,Aldous Huxley,no,5,Dystopian,1932,5,0
-Heart of Darkness,Joseph Conrad,yes,3,Adventure,1899,0,3
-The Grapes of Wrath,John Steinbeck,no,2,Fiction,1939,2,0
-Of Mice and Men,John Steinbeck,yes,1,Tragedy,1937,0,1
-The Old Man and the Sea,Ernest Hemingway,no,3,Fiction,1952,3,0
-The Hobbit,J.R.R. Tolkien,yes,4,Fantasy,1937,0,4
-The Lord of the Rings,J.R.R. Tolkien,yes,2,Fantasy,1954,0,2
-Harry Potter and the Philosopher's Stone,J.K. Rowling,no,7,Fantasy,1997,7,0
-A Game of Thrones,George R.R. Martin,yes,5,Fantasy,1996,0,5
-The Name of the Wind,Patrick Rothfuss,no,3,Fantasy,2007,3,0
-Mistborn: The Final Empire,Brandon Sanderson,yes,4,Fantasy,2006,0,4
-The Handmaid's Tale,Margaret Atwood,no,3,Dystopian,1985,3,0
-The Odyssey,Homer,no,2,Epic Poetry,-800,2,0
-My Life,Jesse Briggs,no,20,Sci-Fi,2024,13,9
+title,author,is_loaned,copies,genre,year,available,request_counter,waitlist
+The Catcher in the Rye,J.D. Salinger,no,3,Fiction,1951,3,6,[]
+To Kill a Mockingbird,Harper Lee,yes,2,Fiction,1960,0,13,[]
+1984,George Orwell,yes,5,Dystopian,1949,0,5,[]
+The Great Gatsby,F. Scott Fitzgerald,no,4,Classic,1925,4,0,[]
+Moby Dick,Herman Melville,no,1,Adventure,1851,1,0,[]
+Pride and Prejudice,Jane Austen,yes,3,Romance,1813,0,3,[]
+War and Peace,Leo Tolstoy,no,2,Historical Fiction,1869,2,0,[]
+Great Expectations,Charles Dickens,no,3,Classic,1861,3,0,[]
+Crime and Punishment,Fyodor Dostoevsky,yes,1,Psychological Drama,1866,0,1,[]
+The Brothers Karamazov,Fyodor Dostoevsky,no,3,Philosophy,1880,3,0,[]
+The Divine Comedy,Dante Alighieri,yes,1,Epic Poetry,1320,0,1,[]
+Jane Eyre,Charlotte Brontë,no,2,Gothic Fiction,1847,2,0,[]
+Wuthering Heights,Emily Brontë,no,4,Gothic Romance,1847,4,0,[]
+Anna Karenina,Leo Tolstoy,yes,2,Fiction,1877,0,2,[]
+Madame Bovary,Gustave Flaubert,no,3,Realism,1857,3,0,[]
+The Iliad,Homer,yes,1,Epic Poetry,-750,0,1,[]
+The Sound and the Fury,William Faulkner,no,2,Modernism,1929,2,0,[]
+Invisible Man,Ralph Ellison,yes,1,Fiction,1952,0,1,[]
+Beloved,Toni Morrison,yes,3,Historical Fiction,1987,0,3,[]
+Catch-22,Joseph Heller,no,4,Satire,1961,4,0,[]
+Slaughterhouse-Five,Kurt Vonnegut,yes,2,Science Fiction,1969,0,2,[]
+Brave New World,Aldous Huxley,no,5,Dystopian,1932,5,0,[]
+Heart of Darkness,Joseph Conrad,yes,3,Adventure,1899,0,3,[]
+The Grapes of Wrath,John Steinbeck,no,2,Fiction,1939,2,0,[]
+Of Mice and Men,John Steinbeck,yes,1,Tragedy,1937,0,1,[]
+The Old Man and the Sea,Ernest Hemingway,no,3,Fiction,1952,3,0,[]
+The Hobbit,J.R.R. Tolkien,yes,4,Fantasy,1937,0,4,[]
+The Lord of the Rings,J.R.R. Tolkien,yes,2,Fantasy,1954,0,2,[]
+Harry Potter and the Philosopher's Stone,J.K. Rowling,no,7,Fantasy,1997,7,0,[]
+A Game of Thrones,George R.R. Martin,yes,5,Fantasy,1996,0,5,[]
+The Name of the Wind,Patrick Rothfuss,no,3,Fantasy,2007,3,0,[]
+Mistborn: The Final Empire,Brandon Sanderson,yes,4,Fantasy,2006,0,4,[]
+The Handmaid's Tale,Margaret Atwood,no,3,Dystopian,1985,3,0,[]
+The Odyssey,Homer,no,2,Epic Poetry,-800,2,0,[]
+My Life,Jesse Briggs,no,20,Sci-Fi,2024,12,10,[]
