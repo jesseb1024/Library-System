@@ -1,8 +1,8 @@
 import csv
 
-from Library_Controls.LibraryFileManager import LibraryFileManager
+from management.LibraryFileManager import LibraryFileManager
 from books.book import Book
-from Library_Controls.StatisticsManager import StatisticsManager
+from management.StatisticsManager import StatisticsManager
 import logging
 from users.librarian import LibrarianManager
 import os

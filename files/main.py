@@ -1,8 +1,8 @@
-from Library_Controls.StatisticsManager import StatisticsManager
-from Library_Controls.LibraryController import LibraryController
-from Library_Controls.library import Library
+from management.StatisticsManager import StatisticsManager
+from management.LibraryController import LibraryController
+from management.library import Library
 from users.librarian import LibrarianManager
-from Library_Controls.gui import LibraryGUI
+from management.gui import LibraryGUI
 import logging
 import os
 

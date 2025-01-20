@@ -1,6 +1,6 @@
 from tkinter import ttk, messagebox, simpledialog
 import tkinter as tk
-from Library_Controls import StatisticsManager
+from management import StatisticsManager
 
 
 

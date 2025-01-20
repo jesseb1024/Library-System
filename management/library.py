@@ -1,5 +1,5 @@
 import logging
-from Library_Controls.StatisticsManager import StatisticsManager
+from management.StatisticsManager import StatisticsManager
 from books.book import Book
 import csv
 
