@@ -1,11 +1,13 @@
 from tkinter import ttk, messagebox, simpledialog
 import tkinter as tk
-from tkinter.font import Font
+from Library_Controls import StatisticsManager
+
 
 
 class LibraryGUI:
     def __init__(self, controller):
         self.controller = controller
+        self.stat_manager = StatisticsManager
 
         # Create the main window
         self.root = tk.Tk()
@@ -134,7 +136,7 @@ class LibraryGUI:
 
     def create_action_buttons(self):
         """Create action buttons for the main dashboard."""
-        button_frame = tk.Frame(self.root, pady=10, padx=30)
+        button_frame = tk.Frame(self.root, pady=10, padx=40)
         button_frame.pack(fill=tk.X)
 
         actions = [
@@ -144,6 +146,8 @@ class LibraryGUI:
             ("Borrow Book", self.borrow_book),
             ("Return Book", self.return_book),
             ("View Waitlist", self.display_waitlist),
+            ("View Available Books", self.display_available_books),
+            ("View Popular Books", self.display_popular_books),
             ("Logout", self.logout)
         ]
 
@@ -156,8 +160,7 @@ class LibraryGUI:
         tree_frame = tk.Frame(self.root, pady=10, padx=10)
         tree_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Columns match the books.csv order
-        columns = ("title", "author", "is_loaned", "copies", "genre", "year", "available", "request_counter", "waitlist")
+        columns = ("title", "author", "is_loaned", "copies", "genre", "year", "available", "request_counter")
         self.book_list = ttk.Treeview(tree_frame, columns=columns, show="headings", selectmode="browse")
 
         for column in columns:
@@ -193,7 +196,7 @@ class LibraryGUI:
             self.book_list.insert(
                 "", tk.END,
                 values=(book.title, book.author, "yes" if book.is_loaned else "no", book.copies,
-                        book.genre, book.year, book.available_copies, book.request_counter, ";".join(book.waitlist))
+                        book.genre, book.year, book.available, book.request_counter)
             )
 
     def search_books(self):
@@ -218,7 +221,7 @@ class LibraryGUI:
                 self.book_list.insert(
                     "", tk.END,
                     values=(book.title, book.author, "yes" if book.is_loaned else "no", book.copies,
-                            book.genre, book.year, book.available_copies, book.request_counter, ";".join(book.waitlist))
+                            book.genre, book.year, book.available_copies, book.request_counter)
                 )
 
     def add_book(self):
@@ -334,6 +337,55 @@ class LibraryGUI:
                 messagebox.showinfo("Waitlist", f"Users on the waitlist for '{title}' by '{author}':\n\n{waitlist_str}")
             else:
                 messagebox.showinfo("Waitlist", f"All waitlist entries for '{title}' by '{author}' are invalid.")
+
+    def display_available_books(self):
+        """Display books with available copies."""
+        available_books = self.controller.get_available_books()
+        self.display_books_popup("Available Books", available_books, "Available Books")
+
+    def display_popular_books(self):
+        """Display popular books sorted by request count."""
+        popular_books = self.controller.get_popular_books()
+        self.display_books_popup("Popular Books", popular_books, "Popular Books")
+
+    def display_books_popup(self, title, books, case):
+        """Show a list of books in a popup window with dynamic columns based on the case."""
+        popup = tk.Toplevel(self.root)
+        popup.title(title)
+        popup.geometry("800x400")
+
+        # Define columns based on the case
+        if case == "Popular Books":
+            columns = ("Title", "Author","Copies", "Genre", "Year", "Available", "Request Counter")
+            data_rows = [
+                (book.title, book.author,  book.copies, book.genre, book.year, book.available_copies,book.request_counter)
+                for book in books
+            ]
+        elif case == "Available Books":
+            columns = ("Title", "Author","Copies","Genre",  "Year", "Available")
+            data_rows = [
+                (book.title, book.author,book.copies,book.genre, book.year, book.available_copies)
+                for book in books
+            ]
+        else:
+            raise ValueError("Unknown case provided.")
+
+        # Create TreeView for dynamic columns
+        book_list = ttk.Treeview(popup, columns=columns, show='headings')
+
+        for column in columns:
+            book_list.heading(column, text=column)
+
+        # Insert the data rows into the TreeView
+        for row in data_rows:
+            book_list.insert("", tk.END, values=row)
+
+        book_list.pack(fill=tk.BOTH, expand=True)
+
+        # Scrollbar configuration
+        scrollbar = ttk.Scrollbar(popup, orient=tk.VERTICAL, command=book_list.yview)
+        book_list.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     def logout(self):
         """Logout the current librarian and return to the login screen."""

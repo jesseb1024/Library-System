@@ -20,28 +20,10 @@ class StatisticsManager:
             self.waiting_list[book_key].append(user)
         self.save_data()  # Save after modification
 
-    def remove_user_from_waitlist(self, book_key, user):
-        """Remove a user from the waitlist."""
-        if book_key in self.waiting_list and user in self.waiting_list[book_key]:
-            self.waiting_list[book_key].remove(user)
-            self.save_data()  # Save after modification
 
     def get_waitlist(self, book_key):
         """Retrieve the waiting list for a specific book."""
         return self.waiting_list.get(book_key, [])
-
-    def increment_request_count(self, book_key):
-        """Increment the request count for a book."""
-        if book_key not in self.request_counts:
-            self.request_counts[book_key] = 0
-        self.request_counts[book_key] += 1
-        self.save_data()  # Save after modification
-
-    def reset_request_count(self, book_key):
-        """Reset the request count for a specific book."""
-        if book_key in self.request_counts:
-            self.request_counts[book_key] = 0
-            self.save_data()  # Save after modification
 
     def get_request_count(self, book_key):
         """Retrieve the request count for a specific book."""

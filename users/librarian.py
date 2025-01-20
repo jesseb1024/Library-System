@@ -19,6 +19,15 @@ class Librarian:
         self.id = id
         self.password_hash = self._hash_password(password)
 
+    def get_password(self):
+        return self.password_hash
+
+    def get_id(self):
+        return self.id
+
+    def get_username(self):
+        return self.username
+
     @staticmethod
     def _hash_password(password):
         """Hash a password using SHA-256."""

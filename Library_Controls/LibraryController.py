@@ -1,31 +1,47 @@
 import csv
+
+from Library_Controls.LibraryFileManager import LibraryFileManager
 from books.book import Book
 from Library_Controls.StatisticsManager import StatisticsManager
 import logging
 from users.librarian import LibrarianManager
+import os
 
-logging.basicConfig(filename='files/library_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(filename='Library/library_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
 
 
 class LibraryController:
-    def __init__(self, library, statistics_manager, librarian_manager, file_path="books.csv"):
-        self.library = library  # Reference to the Library object
-        self.stat_manager = statistics_manager  # Reference to StatisticsManager
-        self.librarian_manager = LibrarianManager()  # Properly assign instance
+    DEFAULT_FILE_PATH = "files/books.csv"
+    def __init__(self, library, statistics_manager, file_path=DEFAULT_FILE_PATH):
+        self.library = library
+        self.stat_manager = statistics_manager
+        self.librarian_manager = LibrarianManager()
         self.file_path = file_path
+        if not isinstance(file_path, (str, os.PathLike)):
+            raise TypeError("file_path must be a string or PathLike object.")
 
-    def add_book(self, title, author, copies, category, year):
+
+    def add_book(self, title, author, copies, genre, year):
         """Add a new book to the library."""
         try:
-            book_identifier = self._generate_book_key(title, author)
-            if self.library.has_book(book_identifier):
-                raise ValueError(f"Book '{title}' by {author} already exists.")
-            book = Book(title, author, category, year, copies)
-            self.library.add_book(book_identifier, book)
+            # Generate book key
+            book_key = self._generate_book_key(title, author)
+            if self.library.has_book(book_key):
+                raise ValueError(f"The book '{title}' by {author} already exists in the library.")
+
+            # Create a new book object
+            new_book = Book(title=title, author=author, genre=genre, year=year, copies=copies, available=copies)
+
+            # Add book to the internal library
+            self.library.add_book(new_book, book_key)
+
+            # ** Synchronize the library data with books.csv **
             self._sync_books()
-            logging.info(f"Book '{title}' added successfully.")
+
+            logging.info(f"Book '{title}' by '{author}' successfully added to the library.")
         except Exception as e:
-            logging.error(f"Failed to add book '{title}': {e}")
+            logging.error(f"Error while adding book '{title}' by '{author}': {str(e)}")
+            raise
 
     def remove_book(self, title, author):
         """Remove a book from the library."""
@@ -45,33 +61,35 @@ class LibraryController:
             setattr(book, key, value)
         self._sync_books()
 
-    def _generate_book_key(self, title, author):
+    @staticmethod
+    def _generate_book_key(title, author):
         """Generate a unique key for the book."""
         return StatisticsManager.generate_key(title, author)
 
     def borrow_book(self, title, author, user):
-        """Borrow a book or add the user to the waitlist if no copies are available."""
+        """Borrow a book or add the user to the waitlist if unavailable."""
         book_key = self._generate_book_key(title, author)
+
         if not self.library.has_book(book_key):
-            raise ValueError(f"Book '{title}' by '{author}' not found in the library.")
+            raise ValueError(f"The book '{title}' by '{author}' does not exist in the library.")
 
         book = self.library.books[book_key]
 
-        # Check if there are available copies to borrow
-        if book.available_copies > 0:
-            # Borrow the book
-            book.available_copies -= 1
-            if book.available_copies == 0:
-                book.is_loaned = True
+        # Increment the request counter for every borrow request
+        book.request_counter += 1
 
-            # Update StatisticsManager
-            self.stat_manager.increment_request_count(book_key)
-            logging.info(f"'{user}' borrowed the book '{title}' by '{author}'.")
+        if book.available_copies > 0:
+            # Decrease the available copies and mark the book as loaned
+            book.available_copies -= 1
+            book.is_loaned = True
+            logging.info(f"Book '{title}' successfully borrowed by {user['name']}.")
         else:
-            # Add the user to the waitlist
+            # Add the user to the waitlist if no copies are available
             self.stat_manager.add_user_to_waitlist(book_key, user)
-            logging.info(f"'{title}' by '{author}' is unavailable. '{user}' has been added to the waitlist.")
-            raise ValueError(f"No available copies of '{title}' by '{author}'. You have been added to the waitlist.")
+            logging.info(f"Book '{title}' is unavailable. {user['name']} added to the waitlist.")
+
+        # Sync changes to the CSV
+        self._sync_books()
 
     def return_book(self, title, author):
         """Return a borrowed book and notify the next user in the waitlist if applicable."""
@@ -97,26 +115,25 @@ class LibraryController:
         else:
             logging.info(f"'{title}' by '{author}' was returned. No users are on the waitlist.")
 
+    def get_popular_books(self):
+        """Get the top 10 most popular books."""
+        books = sorted(self.library.get_books(), key=lambda book: book.request_counter, reverse=True)
+        return books[:10]
+
+    def get_available_books(self):
+        """Get all available books."""
+        available_books = [book for book in self.library.get_books() if not book.is_loaned]
+        return available_books
+
     def _sync_books(self):
-        """Write library data to CSV."""
-        books = self.library.get_all_books()
-        with open(self.file_path, "w", newline="", encoding="utf-8") as file:
-            writer = csv.DictWriter(file, fieldnames=["title", "author", "category", "year", "copies", "available_copies", "is_loaned"])
-            writer.writeheader()
-            for book in books.values():
-                writer.writerow(book.to_dict())
+        """Save library data to CSV using LibraryFileManager."""
+        file_manager = LibraryFileManager(file_path=self.file_path)
+        file_manager.save_books(self.library, self.stat_manager)
 
     def load_books(self):
         """Load books from CSV into the library."""
-        try:
-            with open(self.file_path, "r", encoding="utf-8") as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    book = Book.from_dict(row)
-                    book_identifier = self._generate_book_key(book.title, book.author)
-                    self.library.add_book(book_identifier, book)
-        except FileNotFoundError:
-            pass  # No books to load if the file doesn't exist
+        file_manager = LibraryFileManager(file_path=self.file_path)
+        file_manager.load_books(self.library, self.stat_manager)
 
     def authenticate_librarian(self, username, librarian_id, password):
         """Authenticate a librarian."""
@@ -128,9 +145,9 @@ class LibraryController:
             logging.error(f"Failed to authenticate librarian '{username}' with ID '{librarian_id}': {e}")
             raise
 
-    def register_librarian(self, username, id, password):
+    def register_librarian(self, username, librarian_id, password):
         """Register a new librarian."""
-        if self.librarian_manager.is_librarian_registered(id):
+        if self.librarian_manager.is_librarian_registered(librarian_id):
             raise ValueError("Librarian with this id already exists.")
-        self.librarian_manager.add_librarian(username, id, password)
+        self.librarian_manager.add_librarian(username, librarian_id, password)
         logging.info(f"Librarian '{username}' registered successfully.")

@@ -4,13 +4,8 @@ from Library_Controls.library import Library
 from users.librarian import LibrarianManager
 from Library_Controls.gui import LibraryGUI
 import logging
-logging.basicConfig(
-    filename="library_log.txt",
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    datefmt="%m/%d/%Y %I:%M:%S %p",
-    filemode="w",
-)
+import os
+
 
 # Initialize system components
 def main():
@@ -20,8 +15,16 @@ def main():
     books_file_path = "files/books.csv"
     statistics_file = "statistics.csv"
     librarian_file = "librarians.csv"
+    log_file_path = os.path.abspath("library_log.txt")
 
+    os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+    logging.basicConfig(
+        filename=log_file_path,
+        level=logging.DEBUG,  # Change to INFO or WARNING in production
+        format="%(asctime)s - %(levelname)s - %(message)s"
+    )
 
+    logging.info("Logging setup complete. Application starting.")
 
     # Initialize components
     library = Library(books_file_path)  # Manage books
@@ -34,7 +37,7 @@ def main():
 
 
     # Create the controller and GUI
-    controller = LibraryController(library, statistics_manager, librarian_manager)
+    controller = LibraryController(library, statistics_manager, file_path=books_file_path)
     gui = LibraryGUI(controller)
 
     # Run the GUI
