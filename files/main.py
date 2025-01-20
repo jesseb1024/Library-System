@@ -28,7 +28,7 @@ def main():
 
     # Initialize components
     library = Library(books_file_path)  # Manage books
-    statistics_manager = StatisticsManager(statistics_file)  # Manage waitlists and request counts
+    statistics_manager = StatisticsManager()  # Manage waitlists and request counts
     librarian_manager = LibrarianManager(librarian_file)  # Manage librarians
 
     # Load books into the library from CSV

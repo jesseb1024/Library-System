@@ -52,9 +52,9 @@ class Library:
 
             # Handle 'available' field
             if "available" in line and line["available"]:  # Use provided value if available
-                available_copies = int(line["available"])
+                available = int(line["available"])
             else:  # Default logic for missing or empty 'available'
-                available_copies = 0 if is_loaned else copies
+                available = 0 if is_loaned else copies
 
             # Handle 'request_counter' field
             if "request_counter" in line and line["request_counter"]:  # Use provided value if available
@@ -70,7 +70,7 @@ class Library:
                 copies=copies,
                 genre=genre,
                 year=year,
-                available=available_copies,
+                available=available,
                 request_counter=request_counter,
             )
         except (ValueError, KeyError):

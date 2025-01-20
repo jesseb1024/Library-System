@@ -224,6 +224,7 @@ class LibraryGUI:
                             book.genre, book.year, book.available, book.request_counter)
                 )
 
+
     def add_book(self):
         """Add a new book via the controller."""
         title = simpledialog.askstring("Add Book", "Enter book title:")

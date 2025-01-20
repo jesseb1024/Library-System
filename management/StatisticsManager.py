@@ -1,5 +1,5 @@
 from collections import defaultdict
-import management.User as user
+import users.User as user
 
 class StatisticsManager:
     def __init__(self):
