@@ -358,13 +358,13 @@ class LibraryGUI:
         if case == "Popular Books":
             columns = ("Title", "Author","Copies", "Genre", "Year", "Available", "Request Counter")
             data_rows = [
-                (book.title, book.author,  book.copies, book.genre, book.year, book.available_copies,book.request_counter)
+                (book.title, book.author,  book.copies, book.genre, book.year, book.available,book.request_counter)
                 for book in books
             ]
         elif case == "Available Books":
             columns = ("Title", "Author","Copies","Genre",  "Year", "Available")
             data_rows = [
-                (book.title, book.author,book.copies,book.genre, book.year, book.available_copies)
+                (book.title, book.author,book.copies,book.genre, book.year, book.available)
                 for book in books
             ]
         else:
