@@ -221,7 +221,7 @@ class LibraryGUI:
                 self.book_list.insert(
                     "", tk.END,
                     values=(book.title, book.author, "yes" if book.is_loaned else "no", book.copies,
-                            book.genre, book.year, book.available_copies, book.request_counter)
+                            book.genre, book.year, book.available, book.request_counter)
                 )
 
     def add_book(self):

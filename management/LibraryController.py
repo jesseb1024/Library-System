@@ -78,9 +78,9 @@ class LibraryController:
         # Increment the request counter for every borrow request
         book.request_counter += 1
 
-        if book.available_copies > 0:
+        if book.available > 0:
             # Decrease the available copies and mark the book as loaned
-            book.available_copies -= 1
+            book.available -= 1
             book.is_loaned = True
             logging.info(f"Book '{title}' successfully borrowed by {user['name']}.")
         else:
@@ -100,12 +100,12 @@ class LibraryController:
         book = self.library.books[book_key]
 
         # Check if the book is actually loaned out
-        if book.available_copies >= book.copies:  # All copies are already returned
+        if book.available >= book.copies:  # All copies are already returned
             raise ValueError(f"All copies of '{title}' by '{author}' have already been returned.")
 
         # Increment the available copies
-        book.available_copies += 1
-        if book.available_copies > 0:
+        book.available += 1
+        if book.available > 0:
             book.is_loaned = False
 
         # Notify the next user on the waitlist, if any
