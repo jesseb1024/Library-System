@@ -1,31 +1,75 @@
-from collections import defaultdict
-import users.User as user
+import csv
+import os
+
 
 class StatisticsManager:
-    def __init__(self):
-        self.request_count = defaultdict(int)
-        self.waiting_list = defaultdict(list)
-        self.user = user
+    def __init__(self, storage_file="statistics.csv"):
+        """Initialize the StatisticsManager with CSV-based persistence."""
+        self.storage_file = storage_file
+        self.waiting_list = {}  # In-memory dictionary for waitlists
+        self.request_counts = {}  # In-memory dictionary for request counts
 
-    @staticmethod
-    def generate_key(title, author):
-        """Generates a normalized key for a book based on its title and author."""
-        if not title or not author:
-            raise ValueError("Both title and author are required to generate a key.")
-        return f"{title.strip()}|{author.strip()}"
+        # Load data from the CSV file at initialization
+        self.load_data()
 
-    def update_request_count(self, book_key):
-        """Increment the borrow request count for a book."""
-        self.request_count[book_key] += 1
+    def add_user_to_waitlist(self, book_key, user):
+        """Add a user to the waitlist for a specific book."""
+        if book_key not in self.waiting_list:
+            self.waiting_list[book_key] = []
+        if user not in self.waiting_list[book_key]:
+            self.waiting_list[book_key].append(user)
+        self.save_data()  # Save after modification
+
+
+    def get_waitlist(self, book_key):
+        """Retrieve the waiting list for a specific book."""
+        return self.waiting_list.get(book_key, [])
 
     def get_request_count(self, book_key):
         """Retrieve the request count for a specific book."""
-        return self.request_count.get(book_key, 0)
+        return self.request_counts.get(book_key, 0)
 
-    def load_statistics(self, request_data):
-        """Load request data from an external source."""
-        self.request_count.update(request_data)
+    def notify_waitlist(self, book_key):
+        """Notify users on the waitlist when a book becomes available."""
+        if book_key in self.waiting_list and self.waiting_list[book_key]:
+            user = self.waiting_list[book_key].pop(0)  # Pop the first user in the waitlist
+            self.save_data()  # Save after modification
+            return user
+        return None
 
-    def export_statistics(self):
-        """Export the current request counts for saving."""
-        return dict(self.request_count)
+    def save_data(self):
+        """Save the waiting list and request counts to a CSV file."""
+        with open(self.storage_file, mode="w", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            # Write the header
+            writer.writerow(["title:author", "request_count", "waitlist"])
+            # Write data rows: Combine title-author as the key
+            for book_key, waitlist in self.waiting_list.items():
+                waitlist_str = ";".join([f"{u['name']},{u['email']},{u['phone']}" for u in waitlist])
+                request_count = self.request_counts.get(book_key, 0)
+                writer.writerow([book_key, request_count, waitlist_str])
+
+    def load_data(self):
+        """Load the waiting list and request counts from a CSV file."""
+        if not os.path.exists(self.storage_file):
+            return
+
+        with open(self.storage_file, mode="r") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                book_key = row["title:author"]
+                self.request_counts[book_key] = int(row["request_count"])
+                # Parse the waitlist (semicolon-separated)
+                waitlist_str = row["waitlist"]
+                if waitlist_str:
+                    self.waiting_list[book_key] = [
+                        dict(zip(["name", "email", "phone"], user.split(",")))
+                        for user in waitlist_str.split(";")
+                    ]
+                else:
+                    self.waiting_list[book_key] = []
+
+    @staticmethod
+    def generate_key(title, author):
+        """Generate a unique book key based on title and author."""
+        return f"{title.lower()}:{author.lower()}"

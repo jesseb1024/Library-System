@@ -1,7 +1,6 @@
-import logging
 from management.StatisticsManager import StatisticsManager
 from books.book import Book
-import csv
+
 
 class Library:
     FILE_PATH_NOT_PROVIDED_ERROR = "File path is not provided."
@@ -14,16 +13,17 @@ class Library:
         if not self.books_file_path:
             raise ValueError(self.FILE_PATH_NOT_PROVIDED_ERROR)
         try:
-            with open(self.books_file_path, "r", encoding="utf-8") as file:
-                reader = csv.DictReader(file)
-                for line in reader:
+            with open(self.books_file_path, 'r') as file:
+                # Skip the header row
+                next(file)
+                for line in file:
                     book = self._parse_book_line(line)
                     if book:
                         self.add_book(book)
-                    else:
-                        print(f"Invalid book data: {line}")
+        except FileNotFoundError:
+            print(f"File not found: {self.books_file_path}")
         except Exception as e:
-            raise RuntimeError(f"Failed to load books: {str(e)}")
+            print(f"Error loading books: {type(e).__name__} - {e}")
 
     def add_book(self, book, book_key=None):
         if not isinstance(book, Book):
@@ -31,6 +31,9 @@ class Library:
         if book_key is None:
             book_key = StatisticsManager.generate_key(book.title, book.author)
         self.books[book_key] = book
+
+    def remove_book(self, book_key):
+        del self.books[book_key]
 
     def has_book(self, book_key):
         return book_key in self.books
@@ -42,37 +45,23 @@ class Library:
     @staticmethod
     def _parse_book_line(line):
         try:
-            # Extract and sanitize fields
-            title = line.get("title", "").strip()
-            author = line.get("author", "").strip()
-            is_loaned = line.get("is_loaned", "no").strip().lower() == "yes"
-            copies = int(line.get("copies", 1))  # Default to 1 copy if not provided
-            genre = line.get("genre", "Unknown").strip()
-            year = int(line.get("year", 2000))  # Default to 2000 if not provided
+            title, author, is_loaned, copies, genre, year, available, request_counter = line.strip().split(',')
 
-            # Handle 'available' field
-            if "available" in line and line["available"]:  # Use provided value if available
-                available = int(line["available"])
-            else:  # Default logic for missing or empty 'available'
-                available = 0 if is_loaned else copies
+            # Convert values to their correct types
+            copies = int(copies)
+            available = int(available)
+            is_loaned = available == 0  # Dynamically determine is_loaned based on available copies
 
-            # Handle 'request_counter' field
-            if "request_counter" in line and line["request_counter"]:  # Use provided value if available
-                request_counter = int(line["request_counter"])
-            else:  # Default logic for missing or empty 'request_counter'
-                request_counter = copies if is_loaned else 0
-
-            # Create and return a Book object
             return Book(
                 title=title,
                 author=author,
                 is_loaned=is_loaned,
                 copies=copies,
                 genre=genre,
-                year=year,
+                year=int(year),
                 available=available,
-                request_counter=request_counter,
+                request_counter=int(request_counter)
             )
-        except (ValueError, KeyError):
-            # Return None if data is invalid
+        except ValueError:
+            print(f"Invalid book data: {line.strip()}")
             return None

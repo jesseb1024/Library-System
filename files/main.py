@@ -13,9 +13,9 @@ def main():
 
     # File paths
     books_file_path = "files/books.csv"
-    statistics_file = "statistics.csv"
+    statistics_file = "../statistics.csv"
     librarian_file = "librarians.csv"
-    log_file_path = os.path.abspath("library_log.txt")
+    log_file_path = os.path.abspath("../library_log.txt")
 
     os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
     logging.basicConfig(

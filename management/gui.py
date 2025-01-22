@@ -12,6 +12,7 @@ class LibraryGUI:
         # Create the main window
         self.root = tk.Tk()
         self.root.title("Library Management System")
+        self.root.geometry("1500x1000")
 
         # Initialize GUI components
         self.book_list = None  # TreeView for book details
@@ -26,6 +27,16 @@ class LibraryGUI:
         login_frame = tk.Frame(self.root)
         login_frame.pack(expand=True)
 
+        # Add a title to the login page
+        title_label = tk.Label(
+            login_frame,
+            text="Welcome to Jesse & Lidor's Library",
+            font=("Helvetica", 24, "bold"),
+            fg="blue"
+        )
+        title_label.pack(pady=20)
+
+        # Add login fields
         tk.Label(login_frame, text="Librarian Login", font=("Helvetica", 16)).pack(pady=10)
         tk.Label(login_frame, text="Username").pack(pady=5)
         username_entry = tk.Entry(login_frame)
@@ -56,7 +67,6 @@ class LibraryGUI:
         tk.Button(login_frame, text="Login", command=on_login).pack(pady=10)
         tk.Button(login_frame, text="Register New Librarian",
                   command=lambda: [login_frame.destroy(), self.register_screen()]).pack(pady=5)
-
     def register_screen(self):
         """Create a registration screen for librarian registration."""
         register_frame = tk.Frame(self.root)
@@ -274,7 +284,7 @@ class LibraryGUI:
             return
 
         user_email = simpledialog.askstring("Borrow Book", "Enter your email (e.g., user@example.com):")
-        if not user_email or "@" not in user_email:  # Basic email validation
+        if not user_email or "@" not in user_email:
             messagebox.showerror("Error", "A valid email address is required to borrow a book.")
             return
 
@@ -287,11 +297,17 @@ class LibraryGUI:
         user = {"name": user_name, "email": user_email, "phone": user_phone}
 
         try:
-            self.controller.borrow_book(title, author, user)  # Pass user info to the controller
+            success = self.controller.borrow_book(title, author, user)
             self.update_book_list()
-            messagebox.showinfo("Success", f"'{user_name}' borrowed '{title}' successfully.")
+            if success:
+                messagebox.showinfo("Success", f"'{user_name}' borrowed '{title}' successfully.")
+            else:
+                messagebox.showinfo(
+                    "Waitlist",
+                    f"'{title}' is currently unavailable. '{user_name}' has been added to the waitlist."
+                )
         except ValueError as e:
-            messagebox.showerror("Waitlist Information", str(e))
+            messagebox.showerror("Error", str(e))
 
     def return_book(self):
         """Return a selected book."""
@@ -353,7 +369,7 @@ class LibraryGUI:
         """Show a list of books in a popup window with dynamic columns based on the case."""
         popup = tk.Toplevel(self.root)
         popup.title(title)
-        popup.geometry("800x400")
+        popup.geometry("1500x400")
 
         # Define columns based on the case
         if case == "Popular Books":

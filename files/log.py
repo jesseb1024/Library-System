@@ -4,7 +4,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     datefmt="%m/%d/%Y %I:%M:%S %p",
-    filename="library_log.txt",
+    filename="../library_log.txt",
     filemode="w",
     force=True,  # This ensures your logging configuration is applied
 )

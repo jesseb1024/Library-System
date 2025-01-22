@@ -12,7 +12,7 @@ class LibraryFileManager:
         self.file_path = file_path
 
     def save_books(self, library, statistics_manager):
-        """Save all book data to CSV files."""
+        """Save all book data to CSV."""
         try:
             books = library.get_books()  # Returns a list of Book objects
 
@@ -26,17 +26,14 @@ class LibraryFileManager:
                     "genre": book.genre,
                     "year": book.year,
                     "available": book.available,
-                    "request_counter": statistics_manager.get_request_count(
-                        StatisticsManager.generate_key(book.title, book.author)
-                    ),
+                    "request_counter": book.request_counter  # Save correct request counter
                 }
                 for book in books
             ]
 
-            # Save to CSV using the helper method
+            # Save to CSV
             self._save_to_csv(self.file_path, data)
-
-            logging.info("Books saved successfully to all CSV files.")
+            logging.info("Books saved successfully.")
         except Exception as e:
             logging.error(f"Failed to save books: {e}")
             raise
@@ -48,15 +45,15 @@ class LibraryFileManager:
                 logging.warning(f"File {self.file_path} not found. No books loaded.")
                 return
 
-            with open(self.file_path, "r", encoding="utf-8") as file:  # Use "r" mode
-                reader = csv.DictReader(file)
-                for row in reader:
-                    book = Book.from_dict(row)
-                    if book is None:  # Ensure invalid rows are skipped
-                        continue
-                    book_key = StatisticsManager.generate_key(book.title, book.author)
-                    library.add_book(book, book_key)
-                    statistics_manager.request_counts[book_key] = book.request_counter
+
+            with open(self.file_path, "r", encoding="utf-8") as file:
+                    reader = csv.DictReader(file)
+                    for row in reader:
+                        book = Book.from_dict(row)
+                        if book:
+                            book_key = StatisticsManager.generate_key(book.title, book.author)
+                            library.add_book(book, book_key)
+                            statistics_manager.request_counts[book_key] = book.request_counter  # Sync with stats
                     statistics_manager.waiting_list[book_key] = book.waitlist
 
             logging.info("Books loaded successfully from CSV.")

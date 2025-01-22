@@ -10,7 +10,7 @@ class Book:
         self.genre = genre
         self.is_loaned = is_loaned
         self.available = available  # Available copies
-        self.request_counter = request_counter  # Default to 0, but updated dynamically later
+        self.request_counter = request_counter
 
     def to_dict(self):
         """Convert book details to a dictionary for saving to CSV."""
@@ -33,16 +33,17 @@ class Book:
             book_key = stat_manager.generate_key(data["title"].strip(), data["author"].strip())
             request_counter = stat_manager.get_request_count(book_key)
 
+
             return cls(
-                title=data["title"].strip(),
-                author=data["author"].strip(),
-                year=int(data["year"]),
-                copies=int(data["copies"]),
-                genre=data["genre"].strip(),
-                available=int(data["available"]),
-                is_loaned=data["is_loaned"].strip().lower() == "yes",
-                request_counter=request_counter,  # Dynamically fetched
-            )
+                    title=data.get("title"),
+                    author=data.get("author"),
+                    is_loaned=data.get("is_loaned") == "yes",
+                    copies=int(data.get("copies", 0)),
+                    genre=data.get("genre"),
+                    year=int(data.get("year", 0)),
+                    available=int(data.get("available", 0)),
+                    request_counter=int(data.get("request_count", 0))  # Map request_count
+                )
         except (KeyError, ValueError) as e:
             logging.error(f"Invalid book data: {data} - {e}")
             return None

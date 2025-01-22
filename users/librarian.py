@@ -4,11 +4,11 @@ import logging
 import os
 
 # Ensure the log directory exists
-log_dir = os.path.dirname("../files/library_log.txt")
+log_dir = os.path.dirname("../library_log.txt")
 if log_dir and not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-logging.basicConfig(filename="../files/library_log.txt", level=logging.INFO, format="%(asctime)s - %(message)s")
+logging.basicConfig(filename="../library_log.txt", level=logging.INFO, format="%(asctime)s - %(message)s")
 
 
 class Librarian:
