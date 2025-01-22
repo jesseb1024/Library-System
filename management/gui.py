@@ -518,7 +518,7 @@ class LibraryGUI:
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
-        tk.Button(button_frame, text="Remove", command=return_book, width=10).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="Return", command=return_book, width=10).pack(side=tk.LEFT, padx=5)
 
         tk.Button(button_frame, text="Back",
                   command=lambda: [self.clear_all_books(), return_book_frame.destroy(), self.create_dashboard()],
