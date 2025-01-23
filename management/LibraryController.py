@@ -1,7 +1,7 @@
 import csv
 
 from management.LibraryFileManager import LibraryFileManager
-from books.book import Book
+from books.book import *
 from management.StatisticsManager import StatisticsManager
 import logging
 from users.librarian import LibrarianManager
@@ -11,7 +11,7 @@ logging.basicConfig(filename='library_log.txt', level=logging.INFO, format='%(as
 
 
 class LibraryController:
-    DEFAULT_FILE_PATH = "files/books.csv"
+    DEFAULT_FILE_PATH = os.path.abspath("../files/books.csv")
     def __init__(self, library, statistics_manager, file_path=DEFAULT_FILE_PATH):
         self.library = library
         self.stat_manager = statistics_manager
@@ -53,10 +53,14 @@ class LibraryController:
     def remove_book(self, title, author):
         """Remove a book from the library."""
         book_identifier = self._generate_book_key(title, author)
+        book = self.library.books[book_identifier]
         if not self.library.has_book(book_identifier):
             raise ValueError(f"Book '{title}' by {author} not found in the library.")
-        self.library.remove_book(book_identifier)
-        self._sync_books()
+        if book.available != book.copies:
+            raise ValueError(f"The book '{title}' by {author} cannot be removed from the library.")
+        else:
+            self.library.remove_book(book_identifier)
+            self._sync_books()
 
 
     @staticmethod

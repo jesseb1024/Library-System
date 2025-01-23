@@ -2,6 +2,9 @@ from tkinter import ttk, simpledialog
 from management import StatisticsManager
 from management.SearchStrategy import *
 
+logging.basicConfig(filename=r"C:\Users\97253\PycharmProjects\Library-System2\library_log.txt", level=logging.INFO,
+                    format="%(asctime)s - %(message)s")
+
 
 class LibraryGUI:
     def __init__(self, controller):
@@ -146,12 +149,15 @@ class LibraryGUI:
                 self.controller.authenticate_librarian(username, librarian_id, password)
                 login_frame.destroy()
                 self.create_dashboard()
+                logging.info("logged in successfully")
             except PermissionError as e:
+                logging.info("logged in fail")
                 error_label.config(text=str(e))
 
         tk.Button(login_frame, text="Login", command=on_login).pack(pady=10)
         tk.Button(login_frame, text="Register New Librarian",
                   command=lambda: [login_frame.destroy(), self.register_screen()]).pack(pady=5)
+
     def register_screen(self):
         """Create a registration screen for librarian registration."""
         register_frame = tk.Frame(self.root)
@@ -180,11 +186,13 @@ class LibraryGUI:
 
             if not username or not librarian_id or not password:
                 messagebox.showerror("Error", "All fields are required.")
+                logging.info("registered fail")
                 return
 
             try:
                 self.controller.register_librarian(username, librarian_id, password)
                 messagebox.showinfo("Success", "Librarian registered successfully!")
+                logging.info("registered successfully")
                 register_frame.destroy()
                 self.login_screen()
             except ValueError as e:
@@ -266,6 +274,7 @@ class LibraryGUI:
 
         self.category_combo = ttk.Combobox(view_books_frame, values=get_all_categories(), state="readonly")
         self.category_combo.grid(row=0, column=2, padx=5, pady=5, sticky="w")
+        self.category_combo.set("Categories")
         self.category_combo.grid_forget()
 
         # Function to update the books list based on selected filter
@@ -290,7 +299,7 @@ class LibraryGUI:
                                                   self.create_dashboard()])
         back_button.grid(row=0, column=6, padx=10, sticky="w")
 
-    #DONE
+    # DONE
     def add_book_screen(self):
         """Display a screen to add a new book."""
         for widget in self.root.winfo_children():
@@ -332,7 +341,7 @@ class LibraryGUI:
             changed = 0
             for label, entry in entries.items():
                 if entry.get().strip() != initial_values[label]:
-                    changed +=1
+                    changed += 1
 
             if changed != 5:
                 error_label.config(text="All fields are required.")
@@ -346,11 +355,13 @@ class LibraryGUI:
                 copies = int(entries["Copies"].get().strip())
             except ValueError:
                 error_label.config(text="Year and Copies must be valid integers.")
+                logging.info("book added fail")
                 return
 
             try:
                 self.controller.add_book(title, author, copies, genre, year)
                 messagebox.showinfo("Success", f"Book '{title}' added successfully.")
+                logging.info("book successfully fail")
                 add_book_frame.destroy()
                 self.create_dashboard()
             except Exception as e:
@@ -364,7 +375,7 @@ class LibraryGUI:
         tk.Button(button_frame, text="Back", command=lambda: [add_book_frame.destroy(), self.create_dashboard()]).pack(
             side=tk.RIGHT, padx=10)
 
-    #DONE
+    # DONE
     def remove_book_screen(self):
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -383,12 +394,14 @@ class LibraryGUI:
             selected_item = self.book_list.focus()
             if not selected_item:
                 messagebox.showerror("Error", "No book selected!")
+                logging.info("book removed fail")
                 return
             values = self.book_list.item(selected_item, "values")
             try:
                 self.controller.remove_book(values[0], values[1])
                 self.update_book_list()
                 messagebox.showinfo("Success", "Book removed successfully.")
+                logging.info("book removed successfully")
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
@@ -397,7 +410,6 @@ class LibraryGUI:
         tk.Button(button_frame, text="Back",
                   command=lambda: [self.clear_all_books(), remove_book_frame.destroy(), self.create_dashboard()],
                   width=10).pack(side=tk.RIGHT, padx=5)
-
 
     def lend_book_screen(self):
         """Borrow a selected book or add the user to the waitlist if unavailable."""
@@ -419,6 +431,7 @@ class LibraryGUI:
             selected_item = self.book_list.focus()
             if not selected_item:
                 messagebox.showerror("Error", "No book selected!")
+                logging.info("book borrowed fail")
                 return
 
             # Get the selected book's title and author
@@ -475,9 +488,13 @@ class LibraryGUI:
                 user = {"name": user_name, "email": user_email, "phone": user_phone}
 
                 try:
-                    self.controller.borrow_book(title, author, user)  # Pass user info to the controller
+                    if self.controller.borrow_book(title, author, user) : # Pass user info to the controller
+                        messagebox.showinfo("Success", f"'{user_name}' borrowed '{title}' successfully.")
+                        logging.info("book borrowed successfully")
+                    else:
+                        messagebox.showinfo("Failed",f"Book '{title}' is unavailable. {user['name']} added to the waitlist.")
+                        logging.info("book borrowed fail")
                     self.update_book_list()
-                    messagebox.showinfo("Success", f"'{user_name}' borrowed '{title}' successfully.")
                     user_popup.destroy()
                 except ValueError as e:
                     error_label.config(text=str(e))
@@ -509,12 +526,14 @@ class LibraryGUI:
             selected_item = self.book_list.focus()
             if not selected_item:
                 messagebox.showerror("Error", "No book selected!")
+                logging.info("book returned fail")
                 return
             values = self.book_list.item(selected_item, "values")
             try:
                 self.controller.return_book(values[0], values[1])
                 self.update_book_list()
                 messagebox.showinfo("Success", "Book returned successfully.")
+                logging.info("book returned successfully")
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
@@ -560,6 +579,7 @@ class LibraryGUI:
         """Display popular books sorted by request count."""
         popular_books = self.controller.get_popular_books()
         self.display_books_popup("Popular Books", popular_books, "Popular Books")
+        logging.info("displayed successfully")
 
     def display_available_books(self):
         """Display books with available copies."""
@@ -624,6 +644,7 @@ class LibraryGUI:
 
     def logout(self):
         """Logout the current librarian and return to the login screen."""
+        logging.info("log out successful")
         self.root.destroy()
         self.__init__(self.controller)
 

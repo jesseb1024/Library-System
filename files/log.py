@@ -6,7 +6,7 @@ logging.basicConfig(
     datefmt="%m/%d/%Y %I:%M:%S %p",
     filename="../library_log.txt",
     filemode="w",
-    force=True,  # This ensures your logging configuration is applied
+    force=True
 )
 
 

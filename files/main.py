@@ -12,9 +12,9 @@ def main():
     logging.info("Initializing Library System...")
 
     # File paths
-    books_file_path = "files/books.csv"
-    statistics_file = "../statistics.csv"
-    librarian_file = "librarians.csv"
+    books_file_path = os.path.abspath("../files/books.csv")
+    statistics_file = os.path.abspath("../files/statistics.csv")
+    librarian_file = os.path.abspath("../files/librarian.csv")
     log_file_path = os.path.abspath("../library_log.txt")
 
     os.makedirs(os.path.dirname(log_file_path), exist_ok=True)

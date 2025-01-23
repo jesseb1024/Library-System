@@ -8,7 +8,7 @@ log_dir = os.path.dirname("../library_log.txt")
 if log_dir and not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-logging.basicConfig(filename="../library_log.txt", level=logging.INFO, format="%(asctime)s - %(message)s")
+logging.basicConfig(filename=os.path.abspath("../library_log.txt"), level=logging.INFO, format="%(asctime)s - %(message)s")
 
 
 class Librarian:
@@ -52,7 +52,7 @@ class Librarian:
 class LibrarianManager:
     """Manages librarian registration and authentication."""
 
-    def __init__(self, file_path="files/librarians.csv"):
+    def __init__(self, file_path=os.path.abspath("../files/librarians.csv")):
         self.file_path = file_path
         self.librarians = {}  # Dictionary to store librarians by ID
         self._load_librarians()

@@ -8,7 +8,7 @@ from books.book import Book
 
 
 class LibraryFileManager:
-    def __init__(self, file_path="books.csv"):
+    def __init__(self, file_path= os.path.abspath("../files/books.csv")):
         self.file_path = file_path
 
     def save_books(self, library, statistics_manager):

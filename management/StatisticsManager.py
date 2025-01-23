@@ -3,7 +3,7 @@ import os
 
 
 class StatisticsManager:
-    def __init__(self, storage_file="statistics.csv"):
+    def __init__(self, storage_file=os.path.abspath("../files/statistics.csv")):
         """Initialize the StatisticsManager with CSV-based persistence."""
         self.storage_file = storage_file
         self.waiting_list = {}  # In-memory dictionary for waitlists
