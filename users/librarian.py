@@ -1,15 +1,14 @@
 import csv
 import hashlib
-import logging
 import os
+
+from management.StatisticsManager import StatisticsManager
+from files.Log import add_log
 
 # Ensure the log directory exists
 log_dir = os.path.dirname("../library_log.txt")
 if log_dir and not os.path.exists(log_dir):
     os.makedirs(log_dir)
-
-logging.basicConfig(filename=os.path.abspath("../library_log.txt"), level=logging.INFO, format="%(asctime)s - %(message)s")
-
 
 class Librarian:
     """Represents a single librarian with encrypted password storage."""
@@ -26,7 +25,7 @@ class Librarian:
         return self.id
 
     def get_username(self):
-        return self.username
+        return str(self.username)
 
     @staticmethod
     def _hash_password(password):
@@ -42,16 +41,18 @@ class Librarian:
         return {"username": self.username, "id": self.id, "password_hash": self.password_hash}
 
     @staticmethod
+    def update(observer,user, book_key):
+        add_log(f"Hey librarian: {observer.to_dict()['username']} ,please notify the {user['name']} the book {book_key} is now available.","info")
+
+    @staticmethod
     def from_dict(data):
         """Create a Librarian object from a dictionary."""
         librarian = Librarian(data["username"], data["id"], "")
         librarian.password_hash = data["password_hash"]
         return librarian
 
-
 class LibrarianManager:
     """Manages librarian registration and authentication."""
-
     def __init__(self, file_path=os.path.abspath("../files/librarians.csv")):
         self.file_path = file_path
         self.librarians = {}  # Dictionary to store librarians by ID
@@ -66,7 +67,10 @@ class LibrarianManager:
                     librarian = Librarian.from_dict(row)
                     self.librarians[librarian.id] = librarian
         except FileNotFoundError:
-            logging.warning("Users file not found. Starting with an empty database.")
+            add_log("Users file not found. Starting with an empty database.","warning")
+        statistics_manager = StatisticsManager()
+        for value in self.librarians.values():
+            statistics_manager.register_observer(value)
 
     def _save_librarians(self):
         """Save librarians to the CSV file."""
@@ -79,11 +83,11 @@ class LibrarianManager:
     def add_librarian(self, username, id, password):
         """Register a new librarian."""
         if id in self.librarians:
-            logging.error(f"Registration failed: ID '{id}' already exists.")
+            add_log("Registration failed: ID '{id}' already exists.","error")
             raise ValueError(f"Librarian with ID '{id}' already exists.")
         self.librarians[id] = Librarian(username, id, password)
         self._save_librarians()
-        logging.info(f"Librarian '{username}' registered successfully.")
+        add_log(f"Librarian '{username}' registered successfully.","info")
 
     def is_librarian_registered(self, id):
         """Check if a librarian with the given username is already registered."""
@@ -93,7 +97,7 @@ class LibrarianManager:
         """Authenticate a librarian by username, ID, and password."""
         librarian = self.librarians.get(id)
         if librarian and librarian.username == username and librarian.verify_password(password):
-            logging.info(f"Librarian '{username}' logged in successfully.")
+            add_log(f"Librarian '{username}' logged in successfully.","info")
             return librarian
-        logging.error(f"Authentication failed for username '{username}' and ID '{id}'.")
+        add_log(f"Authentication failed for username '{username}' and ID '{id}'.","error")
         return None

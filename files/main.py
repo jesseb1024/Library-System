@@ -5,11 +5,12 @@ from users.librarian import LibrarianManager
 from management.gui import LibraryGUI
 import logging
 import os
+from files.Log import add_log
 
 
 # Initialize system components
 def main():
-    logging.info("Initializing Library System...")
+    add_log("Initializing Library System...","info")
 
     # File paths
     books_file_path = os.path.abspath("../files/books.csv")
@@ -23,8 +24,7 @@ def main():
         level=logging.DEBUG,  # Change to INFO or WARNING in production
         format="%(asctime)s - %(levelname)s - %(message)s"
     )
-
-    logging.info("Logging setup complete. Application starting.")
+    add_log("Logging setup complete. Application starting.","info")
 
     # Initialize components
     library = Library(books_file_path)  # Manage books
@@ -33,7 +33,7 @@ def main():
 
     # Load books into the library from CSV
     library.load_books_from_file()
-    logging.info("Books loaded successfully from file.")
+    add_log("Books loaded successfully from file.", "info")
 
 
     # Create the controller and GUI
@@ -41,7 +41,7 @@ def main():
     gui = LibraryGUI(controller)
 
     # Run the GUI
-    logging.info("Starting the Library Management GUI...")
+    add_log("Starting the Library Management GUI...", "info")
     gui.run()
 
 

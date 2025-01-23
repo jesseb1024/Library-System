@@ -1,9 +1,9 @@
 import csv
 import pandas as pd
 import os
-import logging
 from management.StatisticsManager import StatisticsManager
 from books.book import Book
+from files.Log import add_log
 
 
 
@@ -33,16 +33,16 @@ class LibraryFileManager:
 
             # Save to CSV
             self._save_to_csv(self.file_path, data)
-            logging.info("Books saved successfully.")
+            add_log("Books saved successfully.","info")
         except Exception as e:
-            logging.error(f"Failed to save books: {e}")
+            add_log(f"Failed to save books: {e}","error")
             raise
 
     def load_books(self, library, statistics_manager):
         """Load book data from books.csv into the library."""
         try:
             if not os.path.exists(self.file_path):
-                logging.warning(f"File {self.file_path} not found. No books loaded.")
+                add_log(f"File {self.file_path} not found. No books loaded.","warning")
                 return
 
 
@@ -56,9 +56,9 @@ class LibraryFileManager:
                             statistics_manager.request_counts[book_key] = book.request_counter  # Sync with stats
                     statistics_manager.waiting_list[book_key] = book.waitlist
 
-            logging.info("Books loaded successfully from CSV.")
+            add_log("Books loaded successfully from CSV.","info")
         except Exception as e:
-            logging.error(f"Failed to load books: {e}")
+            add_log(f"Failed to load books: {e}","error")
             raise
 
     def _save_to_csv(self, file_path, data):
@@ -68,7 +68,7 @@ class LibraryFileManager:
                 writer = csv.DictWriter(file, fieldnames=data[0].keys())
                 writer.writeheader()
                 writer.writerows(data)
-            logging.info(f"Data saved successfully to {file_path}.")
+            add_log(f"Data saved successfully to {file_path}", "info")
         except Exception as e:
-            logging.error(f"Failed to save data to {file_path}: {e}")
+            add_log(f"Failed to save data to {file_path}: {e}", "error")
             raise

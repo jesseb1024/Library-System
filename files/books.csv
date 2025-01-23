@@ -1,6 +1,6 @@
 title,author,is_loaned,copies,genre,year,available,request_counter
-The Catcher in the Rye,J.D. Salinger,no,3,Fiction,1951,3,0
-To Kill a Mockingbird,Harper Lee,yes,2,Fiction,1960,0,11
+The Catcher in the Rye,J.D. Salinger,no,3,Fiction,1951,2,1
+To Kill a Mockingbird,Harper Lee,yes,2,Fiction,1960,0,27
 1984,George Orwell,yes,5,Dystopian,1949,0,5
 The Great Gatsby,F. Scott Fitzgerald,no,4,Classic,1925,3,1
 Moby Dick,Herman Melville,no,1,Adventure,1851,1,0
@@ -33,4 +33,3 @@ The Name of the Wind,Patrick Rothfuss,no,3,Fantasy,2007,3,0
 Mistborn: The Final Empire,Brandon Sanderson,yes,4,Fantasy,2006,0,4
 The Handmaid's Tale,Margaret Atwood,no,3,Dystopian,1985,3,0
 The Odyssey,Homer,yes,2,Epic Poetry,-800,0,3
-a,a,yes,1,a,1,0,1

@@ -3,12 +3,10 @@ import csv
 from management.LibraryFileManager import LibraryFileManager
 from books.book import *
 from management.StatisticsManager import StatisticsManager
-import logging
+
 from users.librarian import LibrarianManager
 import os
-
-logging.basicConfig(filename='library_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
-
+from files.Log import add_log
 
 class LibraryController:
     DEFAULT_FILE_PATH = os.path.abspath("../files/books.csv")
@@ -44,10 +42,10 @@ class LibraryController:
 
             # Synchronize the library data with books.csv
             self._sync_books()
+            add_log(f"Book '{title}' by '{author}' successfully added to the library.","info")
 
-            logging.info(f"Book '{title}' by '{author}' successfully added to the library.")
         except Exception as e:
-            logging.error(f"Error while adding book '{title}' by '{author}': {str(e)}")
+            add_log(f"Error while adding book '{title}' by '{author}': {str(e)}","info")
             raise
 
     def remove_book(self, title, author):
@@ -57,11 +55,10 @@ class LibraryController:
         if not self.library.has_book(book_identifier):
             raise ValueError(f"Book '{title}' by {author} not found in the library.")
         if book.available != book.copies:
-            raise ValueError(f"The book '{title}' by {author} cannot be removed from the library.")
+            raise ValueError(f"The book '{title}' by {author} cannot be removed from the library because the book is lend.")
         else:
             self.library.remove_book(book_identifier)
             self._sync_books()
-
 
     @staticmethod
     def _generate_book_key(title, author):
@@ -84,13 +81,13 @@ class LibraryController:
             # Decrease the available copies and mark the book as loaned
             book.available -= 1
             book.is_loaned = book.available == 0
-            logging.info(f"Book '{title}' successfully borrowed by {user['name']}.")
+            add_log(f"Book '{title}' successfully borrowed by {user['name']}.",'info')
             self._sync_books()
             return True  # Book successfully borrowed
 
         # If no copies are available, add the user to the waitlist
         self.stat_manager.add_user_to_waitlist(book_key, user)
-        logging.info(f"Book '{title}' is unavailable. {user['name']} added to the waitlist.")
+        add_log(f"Book '{title}' is unavailable. {user['name']} added to the waitlist.","info")
         self._sync_books()
         return False  # User added to waitlist
 
@@ -111,12 +108,8 @@ class LibraryController:
         if book.available > 0:
             book.is_loaned = False
 
-        # Notify the next user on the waitlist, if any
-        next_user = self.stat_manager.notify_waitlist(book_key)
-        if next_user:
-            logging.info(f"'{title}' by '{author}' is now available. Notifying '{next_user}'.")
-        else:
-            logging.info(f"'{title}' by '{author}' was returned. No users are on the waitlist.")
+        if self.stat_manager.get_waitlist_count()>0:
+            self.stat_manager.notify_waitlist(book_key,title)
 
     def get_popular_books(self):
         """Get the top 10 most popular books."""
@@ -143,9 +136,9 @@ class LibraryController:
         try:
             if not self.librarian_manager.authenticate(username, librarian_id, password):
                 raise PermissionError("Invalid username, ID, or password.")
-            logging.info(f"Librarian '{username}' with ID '{librarian_id}' authenticated successfully.")
+            add_log(f"Librarian '{username}' with ID '{librarian_id}' authenticated successfully.","info")
         except Exception as e:
-            logging.error(f"Failed to authenticate librarian '{username}' with ID '{librarian_id}': {e}")
+            add_log(f"Failed to authenticate librarian '{username}' with ID '{librarian_id}': {e}", "info")
             raise
 
     def register_librarian(self, username, librarian_id, password):
@@ -153,4 +146,4 @@ class LibraryController:
         if self.librarian_manager.is_librarian_registered(librarian_id):
             raise ValueError("Librarian with this id already exists.")
         self.librarian_manager.add_librarian(username, librarian_id, password)
-        logging.info(f"Librarian '{username}' registered successfully.")
+        add_log(f"Librarian '{username}' registered successfully.","info")

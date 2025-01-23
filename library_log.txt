@@ -1,1 +1,12 @@
-
+01/24/2025 01:52:55 AM - root - INFO - Initializing Library System...
+01/24/2025 01:52:55 AM - root - INFO - Logging setup complete. Application starting.
+01/24/2025 01:52:55 AM - root - WARNING - Users file not found. Starting with an empty database.
+01/24/2025 01:52:55 AM - root - INFO - Books loaded successfully from file.
+01/24/2025 01:52:55 AM - root - INFO - Starting the Library Management GUI...
+01/24/2025 01:53:01 AM - root - INFO - Librarian 'lidor' logged in successfully.
+01/24/2025 01:53:01 AM - root - INFO - Librarian 'lidor' with ID '1234' authenticated successfully.
+01/24/2025 01:53:01 AM - root - INFO - logged in successfully
+01/24/2025 01:53:05 AM - root - INFO - Displayed books by category successfully.
+01/24/2025 01:53:08 AM - root - INFO - Displayed books by category successfully.
+01/24/2025 01:53:09 AM - root - INFO - Displayed books by category successfully.
+01/24/2025 01:53:10 AM - root - INFO - Displayed books by category successfully.
